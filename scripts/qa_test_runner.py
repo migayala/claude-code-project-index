@@ -32,14 +32,14 @@ class QATestRunner:
         # Check if we're in the right directory
         os.chdir(self.project_root)
 
-        # 1. Check node_modules and npm install
+        # 1. Check node_modules and run bootstrap
         if not (self.project_root / 'node_modules').exists():
-            self.log("📦 node_modules not found, running npm install...")
+            self.log("📦 node_modules not found, running npm run bootstrap...")
             try:
                 subprocess.run(['npm', 'run', 'bootstrap'], check=True, capture_output=True)
-                self.log("✅ npm install completed")
+                self.log("✅ npm run bootstrap completed")
             except subprocess.CalledProcessError as e:
-                self.log(f"❌ npm install failed: {e}", "ERROR")
+                self.log(f"❌ npm run bootstrap failed: {e}", "ERROR")
                 return False
 
         # 2. Check .env file
@@ -49,7 +49,7 @@ class QATestRunner:
             return False
 
         # Check required environment variables
-        required_vars = ['BASE_URL', 'LOGIN_EMAIL', 'PASSWORD']
+        required_vars = ['BASE_URL']
         with open(env_file) as f:
             env_content = f.read()
 
@@ -62,16 +62,23 @@ class QATestRunner:
             self.log(f"❌ Missing required environment variables: {', '.join(missing_vars)}", "ERROR")
             return False
 
+        # Check optional but recommended variables
+        optional_vars = ['ANDROID_APP_PATH', 'ELECTRON_APP_PATH']
+        for var in optional_vars:
+            if f'{var}=' not in env_content:
+                self.log(f"⚠️ Optional environment variable {var} not set", "WARN")
+
         self.log("✅ .env file validated")
 
         # 3. Check mobile app paths if testing mobile
         if self.workspace == 'wingspanai-mobile':
             android_path = os.environ.get('ANDROID_APP_PATH')
-            ios_path = os.environ.get('IOS_APP_PATH')
-            default_apps = self.project_root / 'apps'
+            electron_path = os.environ.get('ELECTRON_APP_PATH')
 
-            if not android_path and not ios_path and not default_apps.exists():
-                self.log("⚠️ No mobile app paths found, using default apps folder", "WARN")
+            if not android_path:
+                self.log("⚠️ ANDROID_APP_PATH not set, using default", "WARN")
+            if not electron_path:
+                self.log("⚠️ ELECTRON_APP_PATH not set, using default", "WARN")
 
         # 4. Set REPORT_ITERATION if not set
         if not os.environ.get('REPORT_ITERATION'):
@@ -79,7 +86,7 @@ class QATestRunner:
             self.log(f"📊 Set REPORT_ITERATION to {self.session_id}")
 
         # 5. Check browser installation for Playwright
-        if self.workspace == 'wingspanai-web':
+        if self.workspace in ['wingspanai-web', 'smartscreen'] or self.scope in ['smoke', 'critical', 'regression', 'quick']:
             self.check_playwright_browsers()
 
         return True
@@ -99,22 +106,28 @@ class QATestRunner:
             self.log(f"⚠️ Could not verify Playwright browsers: {e}", "WARN")
 
     def get_test_command(self):
-        """Generate the appropriate test command."""
+        """Generate the appropriate test command based on actual project structure."""
+        # If scope is provided, use root-level scoped commands that include cleaning
+        if self.scope:
+            scope_commands = {
+                'smoke': ['npm', 'run', 'test:smoke'],
+                'critical': ['npm', 'run', 'test:critical'],
+                'regression': ['npm', 'run', 'test:regression'],
+                'quick': ['npm', 'run', 'test:quick'],
+                'all': ['npm', 'run', 'test:all']
+            }
+            if self.scope in scope_commands:
+                return scope_commands[self.scope]
+
+        # Workspace-specific commands (include cleaning)
         if self.workspace == 'wingspanai-web':
-            base_cmd = ['npm', '--workspace=wingspanai-web', 'run', 'test']
-            if self.scope:
-                base_cmd.extend(['--', '--grep', self.scope])
-            # Add retry flag for resilience
-            base_cmd.extend(['--', '--retries=1'])
-            return base_cmd
+            return ['npm', 'run', 'test:wingspanai-web']
         elif self.workspace == 'smartscreen':
-            return ['npm', '--workspace=smartscreen', 'run', 'test']
+            return ['npm', 'run', 'test:smartscreen']
         elif self.workspace == 'wingspanai-mobile':
-            return ['npx', 'wdio', 'run', 'appium.config.ts']
+            return ['npm', 'run', 'test:wingspanai-mobile']
         else:
-            # Default fallback
-            if self.scope:
-                return ['npm', 'run', f'test:{self.scope}']
+            # Default fallback - smoke tests
             return ['npm', 'run', 'test:smoke']
 
     def execute_tests(self):
@@ -143,11 +156,8 @@ class QATestRunner:
 
             exit_code = process.poll()
 
-            # If tests failed and this is a Playwright test, try retry
-            if exit_code != 0 and self.workspace == 'wingspanai-web' and '--retries=1' not in ' '.join(command):
-                self.log("🔄 Tests failed, attempting retry with --retries=1...")
-                retry_command = command + ['--', '--retries=1']
-                return self.execute_single_command(retry_command)
+            # Note: Retry logic is built into the npm scripts via Playwright config
+            # No need for additional retries here
 
             return exit_code, output_lines
 
@@ -169,23 +179,29 @@ class QATestRunner:
         status = "✅ PASSED" if exit_code == 0 else "❌ FAILED"
         self.log(f"🏁 Test execution completed: {status}")
 
-        # Find report directories
+        # Find report directories based on actual project structure
         report_paths = []
-        if self.workspace == 'wingspanai-web':
-            report_base = self.project_root / 'wingspanai-web' / 'test-reports'
-            if report_base.exists():
-                for report_dir in report_base.iterdir():
-                    if report_dir.is_dir() and self.session_id in report_dir.name:
-                        html_report = report_dir / 'html-report' / 'index.html'
-                        if html_report.exists():
-                            report_paths.append(str(html_report))
 
-        elif self.workspace == 'smartscreen':
-            report_base = self.project_root / 'smartscreen' / 'test-reports'
+        # Check for test-reports directories in each workspace
+        for workspace in ['wingspanai-web', 'smartscreen', 'wingspanai-mobile']:
+            report_base = self.project_root / workspace / 'test-reports'
             if report_base.exists():
                 for report_dir in report_base.iterdir():
                     if report_dir.is_dir():
-                        report_paths.append(str(report_dir))
+                        # Look for HTML reports
+                        html_report = report_dir / 'html-report' / 'index.html'
+                        if html_report.exists():
+                            report_paths.append(str(html_report))
+                        else:
+                            # Include directory even without HTML report
+                            report_paths.append(str(report_dir))
+
+        # Also check root test-reports
+        root_reports = self.project_root / 'test-reports'
+        if root_reports.exists():
+            for report_dir in root_reports.iterdir():
+                if report_dir.is_dir():
+                    report_paths.append(str(report_dir))
 
         # Generate summary
         summary = {
@@ -231,7 +247,7 @@ class QATestRunner:
             for path in summary['report_paths']:
                 print(f"  • {path}")
         else:
-            print("📋 No HTML reports found")
+            print("📋 No test reports found")
 
         return summary
 

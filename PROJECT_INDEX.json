@@ -1,1 +1,463 @@
-{"at":"2025-09-10T11:04:22.746713","root":".","tree":[".","\u251c\u2500\u2500 scripts/ (6 files)","\u251c\u2500\u2500 tests/ (4 files)","\u2514\u2500\u2500 README.md"],"stats":{"total_files":9,"total_directories":2,"fully_parsed":{"shell":1,"python":4},"listed_only":{"json":1,"shell":3},"markdown_files":2},"f":{"s/find_python.sh":["s",["find_python:0:()::"]],"s/i_flag_hook.py":["p",["find_project_root:23:()::Find project root by looking for .git or common project markers.","get_last_interactive_size:45:():find_project_root:Get the last remembered -i size from the index.","parse_index_flag:66:(prompt):get_last_interactive_size:Parse -i or -ic flag with optional size.","calculate_files_hash:104:(project_root)::Calculate hash of non-ignored files to detect changes.","should_regenerate_index:141:(project_root, index_path, requested_size_k):calculate_files_hash:Determine if index needs regeneration.","generate_index_at_size:173:(project_root, target_size_k, is_clipboard_mode=False):calculate_files_hash:Generate index at specific token size.","copy_to_clipboard:259:(prompt, index_path)::Copy prompt, instructions, and index to clipboard for external AI.","main:566:():copy_to_clipboard,find_project_root,generate_index_at_size,parse_index_flag,should_regenerate_index:Process UserPromptSubmit hook for -i and -ic flag detection."]],"s/index_utils.py":["p",["extract_function_calls_python:74:(body:str, all_functions:Set[str])>List[str]::Extract function calls from Python code body.","extract_function_calls_javascript:104:(body:str, all_functions:Set[str])>List[str]::Extract function calls from JavaScript/TypeScript code body.","build_call_graph:132:(functions:Dict, classes:Dict)>Tuple[Dict, Dict]::Build bidirectional call graph from extracted functions and methods.","extract_python_signatures:161:(content:str)>Dict[str, Dict]:extract_function_calls_python:Extract Python function and class signatures with full details for all files.","extract_javascript_signatures:545:(content:str)>Dict[str, any]:extract_function_calls_javascript,pos_to_line:Extract JavaScript/TypeScript function and class signatures with full details.","extract_function_calls_shell:906:(body:str, all_functions:Set[str])>List[str]::Extract function calls from shell script body.","extract_shell_signatures:928:(content:str)>Dict[str, any]:extract_function_calls_shell:Extract shell script function signatures and structure.","extract_markdown_structure:1186:(file_path:Path)>Dict[str, List[str]]::Extract headers and architectural hints from markdown files.","infer_file_purpose:1217:(file_path:Path)>Optional[str]::Infer the purpose of a file from its name and location.","infer_directory_purpose:1240:(path:Path, files_within:List[str])>Optional[str]::Infer directory purpose from naming patterns and contents.","get_language_name:1270:(extension:str)>str::Get readable language name from extension.","parse_gitignore:1281:(gitignore_path:Path)>List[str]::Parse a .gitignore file and return list of patterns.","load_gitignore_patterns:1301:(root_path:Path)>Set[str]:parse_gitignore:Load all gitignore patterns from project root and merge with defaults.","matches_gitignore_pattern:1324:(path:Path, patterns:Set[str], root_path:Path)>bool::Check if a path matches any gitignore pattern.","should_index_file:1368:(path:Path, root_path:Path = None)>bool:load_gitignore_patterns,matches_gitignore_pattern:Check if we should index this file.","get_git_files:1388:(root_path:Path)>Optional[List[Path]]::"]],"s/project_index.py":["p",["generate_tree_structure:40:(root_path:Path, max_depth:int = MAX_TREE_DEPTH)>List[str]:add_tree_level,should_include_dir:Generate a compact ASCII tree representation of the directory structure.","build_index:109:(root_dir:str)>Tuple[Dict, int]:generate_tree_structure:Build the enhanced index with architectural awareness.","convert_to_enhanced_dense_format:404:(index:Dict)>Dict:truncate_doc:Convert to enhanced dense format that preserves all AI-relevant information.","compress_if_needed:529:(dense_index:Dict, target_size:int = MAX_INDEX_SIZE)>Dict::Compress dense index further if it exceeds size limit.","print_summary:660:(index:Dict, skipped_count:int)::Print a helpful summary of what was indexed.","main:708:():build_index,compress_if_needed,convert_to_enhanced_dense_format,print_summary:Run the enhanced indexer."]],"s/stop_hook.py":["p",["main:14:()::Stop hook - regenerate index if PROJECT_INDEX.json exists."]]},"g":[["load_gitignore_patterns","parse_gitignore"],["main","print_summary"],["extract_javascript_signatures","extract_function_calls_javascript"],["convert_to_enhanced_dense_format","truncate_doc"],["extract_python_signatures","extract_function_calls_python"],["should_regenerate_index","calculate_files_hash"],["main","should_regenerate_index"],["generate_tree_structure","should_include_dir"],["parse_index_flag","get_last_interactive_size"],["main","compress_if_needed"],["generate_index_at_size","calculate_files_hash"],["main","build_index"],["main","convert_to_enhanced_dense_format"],["main","generate_index_at_size"],["get_last_interactive_size","find_project_root"],["build_index","generate_tree_structure"],["should_index_file","load_gitignore_patterns"],["main","find_project_root"],["generate_tree_structure","add_tree_level"],["main","parse_index_flag"],["should_index_file","matches_gitignore_pattern"],["main","copy_to_clipboard"],["extract_javascript_signatures","pos_to_line"],["extract_shell_signatures","extract_function_calls_shell"]],"d":{".claude-code-ericbuess/CONTEXT_STATE.md":["\ud83d\udd04 Auto-Generated Context State","\ud83d\udccd Current Session","\ud83d\udcca Git Status","\ud83d\udcdd Recently Modified Files","\ud83d\udccc Context Notes"],"README.md":["Project Index for Claude Code","Background","Quick Install","Usage","Or manually create/update the index anytime","What It Does","Three Ways to Use","Small Projects - Direct Reference with `@PROJECT_INDEX.json`","Reference directly in your prompt","Or auto-load in every session by adding to CLAUDE.md:"]},"deps":{"scripts/i_flag_hook.py":["json","sys","os","re","subprocess","hashlib","time","pathlib","datetime","sys","vm_client_network","vm_client","base64","pyperclip"],"scripts/index_utils.py":["re","fnmatch","pathlib","typing","subprocess"],"scripts/project_index.py":["json","os","re","datetime","pathlib","typing","index_utils","index_utils","sys"],"scripts/stop_hook.py":["json","sys","os","subprocess","pathlib"]},"dir_purposes":{"scripts":"Build and utility scripts"},"staleness":1756915462.765223}
+{
+  "at": "2025-09-26T10:29:53.687456",
+  "root": ".",
+  "tree": [
+    ".",
+    "\u251c\u2500\u2500 agents/",
+    "\u251c\u2500\u2500 scripts/ (9 files)",
+    "\u2514\u2500\u2500 README.md"
+  ],
+  "stats": {
+    "total_files": 12,
+    "total_directories": 3,
+    "fully_parsed": {
+      "python": 7,
+      "shell": 1
+    },
+    "listed_only": {
+      "json": 1,
+      "shell": 3
+    },
+    "markdown_files": 3
+  },
+  "f": {
+    "s/combined_hook.py": [
+      "p",
+      [
+        "main:12:()::Process UserPromptSubmit hook for both -i and -t flags."
+      ]
+    ],
+    "s/find_python.sh": [
+      "s",
+      [
+        "find_python:0:()::"
+      ]
+    ],
+    "s/i_flag_hook.py": [
+      "p",
+      [
+        "find_project_root:23:()::Find project root by looking for .git or common project markers.",
+        "get_last_interactive_size:45:():find_project_root:Get the last remembered -i size from the index.",
+        "parse_index_flag:66:(prompt):get_last_interactive_size:Parse -i or -ic flag with optional size.",
+        "calculate_files_hash:104:(project_root)::Calculate hash of non-ignored files to detect changes.",
+        "should_regenerate_index:141:(project_root, index_path, requested_size_k):calculate_files_hash:Determine if index needs regeneration.",
+        "generate_index_at_size:173:(project_root, target_size_k, is_clipboard_mode=False):calculate_files_hash:Generate index at specific token size.",
+        "copy_to_clipboard:259:(prompt, index_path)::Copy prompt, instructions, and index to clipboard for external AI.",
+        "main:566:():copy_to_clipboard,find_project_root,generate_index_at_size,parse_index_flag,should_regenerate_index:Process UserPromptSubmit hook for -i and -ic flag detection."
+      ]
+    ],
+    "s/index_utils.py": [
+      "p",
+      [
+        "extract_function_calls_python:74:(body:str, all_functions:Set[str])>List[str]::Extract function calls from Python code body.",
+        "extract_function_calls_javascript:104:(body:str, all_functions:Set[str])>List[str]::Extract function calls from JavaScript/TypeScript code body.",
+        "build_call_graph:132:(functions:Dict, classes:Dict)>Tuple[Dict, Dict]::Build bidirectional call graph from extracted functions and methods.",
+        "extract_python_signatures:161:(content:str)>Dict[str, Dict]:extract_function_calls_python:Extract Python function and class signatures with full details for all files.",
+        "extract_javascript_signatures:545:(content:str)>Dict[str, any]:extract_function_calls_javascript,pos_to_line:Extract JavaScript/TypeScript function and class signatures with full details.",
+        "extract_function_calls_shell:906:(body:str, all_functions:Set[str])>List[str]::Extract function calls from shell script body.",
+        "extract_shell_signatures:928:(content:str)>Dict[str, any]:extract_function_calls_shell:Extract shell script function signatures and structure.",
+        "extract_markdown_structure:1186:(file_path:Path)>Dict[str, List[str]]::Extract headers and architectural hints from markdown files.",
+        "infer_file_purpose:1217:(file_path:Path)>Optional[str]::Infer the purpose of a file from its name and location.",
+        "infer_directory_purpose:1240:(path:Path, files_within:List[str])>Optional[str]::Infer directory purpose from naming patterns and contents.",
+        "get_language_name:1270:(extension:str)>str::Get readable language name from extension.",
+        "parse_gitignore:1281:(gitignore_path:Path)>List[str]::Parse a .gitignore file and return list of patterns.",
+        "load_gitignore_patterns:1301:(root_path:Path)>Set[str]:parse_gitignore:Load all gitignore patterns from project root and merge with defaults.",
+        "matches_gitignore_pattern:1324:(path:Path, patterns:Set[str], root_path:Path)>bool::Check if a path matches any gitignore pattern.",
+        "should_index_file:1368:(path:Path, root_path:Path = None)>bool:load_gitignore_patterns,matches_gitignore_pattern:Check if we should index this file.",
+        "get_git_files:1388:(root_path:Path)>Optional[List[Path]]::"
+      ]
+    ],
+    "s/project_index.py": [
+      "p",
+      [
+        "generate_tree_structure:40:(root_path:Path, max_depth:int = MAX_TREE_DEPTH)>List[str]:add_tree_level,should_include_dir:Generate a compact ASCII tree representation of the directory structure.",
+        "build_index:109:(root_dir:str)>Tuple[Dict, int]:generate_tree_structure:Build the enhanced index with architectural awareness.",
+        "convert_to_enhanced_dense_format:404:(index:Dict)>Dict:truncate_doc:Convert to enhanced dense format that preserves all AI-relevant information.",
+        "compress_if_needed:529:(dense_index:Dict, target_size:int = MAX_INDEX_SIZE)>Dict::Compress dense index further if it exceeds size limit.",
+        "print_summary:660:(index:Dict, skipped_count:int)::Print a helpful summary of what was indexed.",
+        "main:708:():build_index,compress_if_needed,convert_to_enhanced_dense_format,print_summary:Run the enhanced indexer."
+      ]
+    ],
+    "s/qa_test_runner.py": [
+      "p",
+      [
+        "main:254:():run:Entry point for the QA Test Runner."
+      ],
+      {
+        "QATestRunner": [
+          "16",
+          [
+            "__init__:17:(self, project_root, workspace=None, scope=None)::",
+            "log:23:(self, message, level=\"INFO\")::Log messages with timestamp.",
+            "check_prerequisites:28:(self):check_playwright_browsers,log,run:Verify all prerequisites before running tests.",
+            "check_playwright_browsers:94:(self):log,run:Check if Playwright browsers are installed.",
+            "get_test_command:108:(self)::Generate the appropriate test command based on actual project structure.",
+            "execute_tests:133:(self):get_test_command,log:Execute tests with streaming output and retry logic.",
+            "execute_single_command:168:(self, command):run:Execute a single command and return results.",
+            "generate_report_summary:177:(self, exit_code, output_lines):log:Generate a summary of test results and report locations.",
+            "run:219:(self):check_prerequisites,execute_tests,generate_report_summary,log:Main execution flow."
+          ]
+        ]
+      }
+    ],
+    "s/stop_hook.py": [
+      "p",
+      [
+        "main:14:()::Stop hook - regenerate index if PROJECT_INDEX.json exists."
+      ]
+    ],
+    "s/t_flag_hook.py": [
+      "p",
+      [
+        "find_project_root:15:()::Find project root by looking for .git or common project markers.",
+        "parse_test_flag:37:(prompt)::",
+        "detect_workspace_changes:53:():find_project_root:",
+        "get_test_command:94:(workspace, scope)::",
+        "main:113:():detect_workspace_changes,get_test_command,parse_test_flag:Process UserPromptSubmit hook for -t flag detection."
+      ]
+    ]
+  },
+  "g": [
+    [
+      "QATestRunner.execute_tests",
+      "QATestRunner.get_test_command"
+    ],
+    [
+      "generate_index_at_size",
+      "calculate_files_hash"
+    ],
+    [
+      "QATestRunner.generate_report_summary",
+      "log"
+    ],
+    [
+      "detect_workspace_changes",
+      "find_project_root"
+    ],
+    [
+      "build_index",
+      "generate_tree_structure"
+    ],
+    [
+      "get_last_interactive_size",
+      "find_project_root"
+    ],
+    [
+      "QATestRunner.check_prerequisites",
+      "log"
+    ],
+    [
+      "parse_index_flag",
+      "get_last_interactive_size"
+    ],
+    [
+      "main",
+      "QATestRunner.get_test_command"
+    ],
+    [
+      "QATestRunner.run",
+      "execute_tests"
+    ],
+    [
+      "main",
+      "copy_to_clipboard"
+    ],
+    [
+      "QATestRunner.check_playwright_browsers",
+      "QATestRunner.log"
+    ],
+    [
+      "QATestRunner.check_prerequisites",
+      "QATestRunner.run"
+    ],
+    [
+      "main",
+      "find_project_root"
+    ],
+    [
+      "QATestRunner.run",
+      "check_prerequisites"
+    ],
+    [
+      "QATestRunner.execute_tests",
+      "get_test_command"
+    ],
+    [
+      "main",
+      "run"
+    ],
+    [
+      "QATestRunner.execute_single_command",
+      "QATestRunner.run"
+    ],
+    [
+      "QATestRunner.run",
+      "QATestRunner.log"
+    ],
+    [
+      "QATestRunner.run",
+      "QATestRunner.execute_tests"
+    ],
+    [
+      "main",
+      "generate_index_at_size"
+    ],
+    [
+      "main",
+      "compress_if_needed"
+    ],
+    [
+      "main",
+      "get_test_command"
+    ],
+    [
+      "main",
+      "parse_index_flag"
+    ],
+    [
+      "extract_javascript_signatures",
+      "pos_to_line"
+    ],
+    [
+      "should_index_file",
+      "load_gitignore_patterns"
+    ],
+    [
+      "should_index_file",
+      "matches_gitignore_pattern"
+    ],
+    [
+      "convert_to_enhanced_dense_format",
+      "truncate_doc"
+    ],
+    [
+      "QATestRunner.check_playwright_browsers",
+      "log"
+    ],
+    [
+      "QATestRunner.execute_tests",
+      "QATestRunner.log"
+    ],
+    [
+      "main",
+      "build_index"
+    ],
+    [
+      "QATestRunner.check_playwright_browsers",
+      "QATestRunner.run"
+    ],
+    [
+      "QATestRunner.run",
+      "generate_report_summary"
+    ],
+    [
+      "generate_tree_structure",
+      "should_include_dir"
+    ],
+    [
+      "QATestRunner.check_prerequisites",
+      "run"
+    ],
+    [
+      "QATestRunner.run",
+      "QATestRunner.generate_report_summary"
+    ],
+    [
+      "QATestRunner.run",
+      "log"
+    ],
+    [
+      "QATestRunner.execute_single_command",
+      "run"
+    ],
+    [
+      "main",
+      "should_regenerate_index"
+    ],
+    [
+      "QATestRunner.check_prerequisites",
+      "QATestRunner.check_playwright_browsers"
+    ],
+    [
+      "extract_shell_signatures",
+      "extract_function_calls_shell"
+    ],
+    [
+      "QATestRunner.run",
+      "QATestRunner.check_prerequisites"
+    ],
+    [
+      "QATestRunner.generate_report_summary",
+      "QATestRunner.log"
+    ],
+    [
+      "main",
+      "detect_workspace_changes"
+    ],
+    [
+      "load_gitignore_patterns",
+      "parse_gitignore"
+    ],
+    [
+      "main",
+      "parse_test_flag"
+    ],
+    [
+      "extract_python_signatures",
+      "extract_function_calls_python"
+    ],
+    [
+      "QATestRunner.execute_tests",
+      "log"
+    ],
+    [
+      "QATestRunner.check_playwright_browsers",
+      "run"
+    ],
+    [
+      "QATestRunner.check_prerequisites",
+      "QATestRunner.log"
+    ],
+    [
+      "generate_tree_structure",
+      "add_tree_level"
+    ],
+    [
+      "QATestRunner.check_prerequisites",
+      "check_playwright_browsers"
+    ],
+    [
+      "extract_javascript_signatures",
+      "extract_function_calls_javascript"
+    ],
+    [
+      "main",
+      "QATestRunner.run"
+    ],
+    [
+      "main",
+      "convert_to_enhanced_dense_format"
+    ],
+    [
+      "main",
+      "print_summary"
+    ],
+    [
+      "should_regenerate_index",
+      "calculate_files_hash"
+    ]
+  ],
+  "d": {
+    ".claude-code-ericbuess/CONTEXT_STATE.md": [
+      "\ud83d\udd04 Auto-Generated Context State",
+      "\ud83d\udccd Current Session",
+      "\ud83d\udcca Git Status",
+      "\ud83d\udcdd Recently Modified Files",
+      "\ud83d\udccc Context Notes"
+    ],
+    "README.md": [
+      "Project Index for Claude Code",
+      "Background",
+      "Quick Install",
+      "Usage",
+      "Or manually create/update the index anytime",
+      "What It Does",
+      "Three Ways to Use",
+      "Small Projects - Direct Reference with `@PROJECT_INDEX.json`",
+      "Reference directly in your prompt",
+      "Or auto-load in every session by adding to CLAUDE.md:"
+    ],
+    "agents/index-analyzer.md": [
+      "YOUR PRIMARY DIRECTIVE",
+      "ULTRATHINKING FRAMEWORK",
+      "Understanding Intent",
+      "Code Relationship Analysis",
+      "Strategic Recommendations",
+      "OUTPUT FORMAT",
+      "\ud83e\udde0 Code Intelligence Analysis",
+      "UNDERSTANDING YOUR REQUEST",
+      "ESSENTIAL CODE PATHS",
+      "ARCHITECTURAL INSIGHTS"
+    ]
+  },
+  "deps": {
+    "scripts/combined_hook.py": [
+      "json",
+      "sys",
+      "subprocess",
+      "os"
+    ],
+    "scripts/i_flag_hook.py": [
+      "json",
+      "sys",
+      "os",
+      "re",
+      "subprocess",
+      "hashlib",
+      "time",
+      "pathlib",
+      "datetime",
+      "sys",
+      "vm_client_network",
+      "vm_client",
+      "base64",
+      "pyperclip"
+    ],
+    "scripts/index_utils.py": [
+      "re",
+      "fnmatch",
+      "pathlib",
+      "typing",
+      "subprocess"
+    ],
+    "scripts/project_index.py": [
+      "json",
+      "os",
+      "re",
+      "datetime",
+      "pathlib",
+      "typing",
+      "index_utils",
+      "index_utils",
+      "sys"
+    ],
+    "scripts/qa_test_runner.py": [
+      "json",
+      "sys",
+      "os",
+      "subprocess",
+      "shutil",
+      "pathlib",
+      "datetime",
+      "time"
+    ],
+    "scripts/stop_hook.py": [
+      "json",
+      "sys",
+      "os",
+      "subprocess",
+      "pathlib"
+    ],
+    "scripts/t_flag_hook.py": [
+      "json",
+      "sys",
+      "os",
+      "re",
+      "subprocess",
+      "pathlib",
+      "datetime"
+    ]
+  },
+  "dir_purposes": {
+    "scripts": "Build and utility scripts"
+  },
+  "staleness": 1758302993.736799,
+  "_meta": {
+    "target_size_k": 25,
+    "generated_at": 1758907793.7429476,
+    "actual_size_k": 3,
+    "files_hash": "87185a3e7be5f36c",
+    "compression_ratio": "12.0%",
+    "last_interactive_size_k": 25
+  }
+}
